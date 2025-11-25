@@ -27,31 +27,32 @@ API для управления пользователями ботофермы 
 - **Testing:** pytest, pytest-asyncio, httpx
 - **Containerization:** Docker, Docker Compose
 
-## 📁 Структура проекта
 
-botoferma/
-├── app/ # Исходный код приложения
-│ ├── main.py # Точка входа FastAPI
-│ ├── config.py # Конфигурация и настройки
-│ ├── database.py # Подключение к БД
-│ ├── auth.py # JWT токены и аутентификация
-│ └── users/ # Модуль пользователей
-│ ├── models.py # SQLAlchemy модели
-│ ├── schemas.py # Pydantic схемы
-│ ├── crud.py # CRUD операции
-│ ├── utils.py # Утилиты (хеширование)
-│ └── router.py # API endpoints
-├── tests/ # Тесты
-│ ├── conftest.py # Фикстуры pytest
-│ └── test_users.py # E2E тесты API
-├── docker-compose.yml # Docker Compose конфигурация
-├── Dockerfile # Docker образ
-├── requirements.txt # Python зависимости
-├── pytest.ini # Конфигурация pytest
-├── .env # Переменные окружения
-└── README.md
+### 📂 Описание директорий
 
-text
+**app/** - Исходный код приложения
+- `main.py` - Точка входа FastAPI
+- `config.py` - Настройки приложения
+- `database.py` - Подключение к PostgreSQL
+- `auth.py` - JWT токены и аутентификация
+
+**app/users/** - Модуль пользователей
+- `models.py` - SQLAlchemy ORM модели
+- `schemas.py` - Pydantic схемы валидации
+- `crud.py` - CRUD операции с БД
+- `utils.py` - Утилиты (хеширование паролей)
+- `router.py` - REST API endpoints
+
+**tests/** - Тестирование
+- `conftest.py` - Pytest fixtures
+- `test_users.py` - E2E тесты API
+
+**Конфигурационные файлы:**
+- `docker-compose.yml` - Docker Compose конфигурация
+- `Dockerfile` - Docker образ приложения
+- `requirements.txt` - Python зависимости
+- `pytest.ini` - Конфигурация pytest
+- `.env` - Переменные окружения
 
 ## 🚀 Быстрый старт
 
@@ -60,15 +61,14 @@ text
 Клонировать репозиторий
 
 git clone [<repository-url>](https://github.com/L0l1pop/Botoferma.git)
+
 cd botoferma
+
 Создать .env файл
 
 Запустить с Docker Compose
 
 docker-compose up --build
-
-
-text
 
 Приложение доступно на http://localhost:8000
 
@@ -77,32 +77,43 @@ text
 Создать виртуальное окружение
 
 python -m venv venv
+
 source venv/bin/activate # Linux/Mac
+
 или
 
 venv\Scripts\activate # Windows
+
 Установить зависимости
 
 pip install -r requirements.txt
+
 Настроить .env файл
 
 Запустить PostgreSQL (через Docker или локально)
 
 docker run -d
+
 --name botoferma_postgres
+
 -e POSTGRES_USER=postgres
+
 -e POSTGRES_PASSWORD=postgres
+
 -e POSTGRES_DB=botoferma
+
 -p 5432:5432
+
 postgres:14-alpine
+
 Инициализировать БД
 
 python -m app.init_db
+
 Запустить приложение
 
 uvicorn app.main:app --reload
 
-text
 
 ## 🔧 Конфигурация
 
@@ -111,26 +122,31 @@ text
 Database
 
 POSTGRES_USER=postgres
+
 POSTGRES_PASSWORD=postgres
+
 POSTGRES_HOST=localhost
+
 POSTGRES_PORT=5432
+
 POSTGRES_DB=botoferma
+
 JWT
 
 SECRET_KEY=your-secret-key-min-32-characters-long
+
 ALGORITHM=HS256
+
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
 App
 
 DEBUG=True
-
-text
 
 Для генерации `SECRET_KEY`:
 
 openssl rand -hex 32
 
-text
 
 ## 📚 API Документация
 
@@ -145,115 +161,78 @@ text
 #### Аутентификация
 
 POST /api/register # Регистрация пользователя
+
 POST /api/login # Получение JWT токена
+
 GET /api/users/me # Информация о текущем пользователе
 
-text
 
 #### Управление пользователями
 
 GET /api/users # Список всех пользователей
+
 POST /api/users/acquire # Заблокировать пользователя для теста
+
 POST /api/users/release # Разблокировать пользователя
 
-text
 
 ## 🧪 Тестирование
 
 Запустить все тесты
 
 pytest
+
 С подробным выводом
 
 pytest -v
+
 С покрытием кода
 
 pytest --cov=app --cov-report=html
+
 Конкретный тест
 
 pytest tests/test_users.py::test_register_user
+
 В Docker
 
 docker-compose exec app pytest -v
 
-text
-
-## 📝 Примеры использования
-
-### Регистрация пользователя
-
-curl -X POST "http://localhost:8000/api/register"
--H "Content-Type: application/json"
--d '{
-"login": "test@example.com",
-"password": "password123",
-"project_id": "550e8400-e29b-41d4-a716-446655440000",
-"env": "prod",
-"domain": "regular"
-}'
-
-text
-
-### Аутентификация
-
-curl -X POST "http://localhost:8000/api/login"
--H "Content-Type: application/json"
--d '{
-"login": "test@example.com",
-"password": "password123"
-}'
-
-text
-
-### Блокировка пользователя для теста
-
-TOKEN="your-jwt-token"
-USER_ID="550e8400-e29b-41d4-a716-446655440000"
-
-curl -X POST "http://localhost:8000/api/users/acquire"
--H "Authorization: Bearer $TOKEN"
--H "Content-Type: application/json"
--d "{"user_id": "$USER_ID"}"
-
-text
-
-### Разблокировка пользователя
-
-curl -X POST "http://localhost:8000/api/users/release"
--H "Authorization: Bearer $TOKEN"
--H "Content-Type: application/json"
--d "{"user_id": "$USER_ID"}"
-
-text
 
 ## 🐳 Docker команды
 
 Собрать образы
 
 docker-compose build
+
 Запустить сервисы
 
 docker-compose up -d
+
 Остановить сервисы
 
 docker-compose down
+
 Удалить с volumes (БД)
 
 docker-compose down -v
+
 Логи приложения
 
 docker-compose logs -f app
+
 Логи PostgreSQL
 
 docker-compose logs -f postgres
+
 Войти в контейнер
 
 docker-compose exec app bash
+
 Перезапустить сервисы
 
 docker-compose restart
 
-text
 
 ## 📊 Модель данных
 
