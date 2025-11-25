@@ -1,0 +1,279 @@
+# Ботоферма API
+
+API для управления пользователями ботофермы для E2E-тестирования. Сервис предоставляет возможность регистрации пользователей, аутентификации и управления блокировками для параллельного выполнения тестов.
+
+## 🚀 Функционал
+
+- ✅ Регистрация пользователей с хешированием паролей (bcrypt)
+- ✅ JWT аутентификация
+- ✅ Блокировка/разблокировка пользователей для E2E-тестов
+- ✅ REST API с автоматической документацией (Swagger/OpenAPI)
+- ✅ Async PostgreSQL через SQLAlchemy 2.0
+- ✅ Полное покрытие тестами (pytest)
+- ✅ Docker поддержка
+
+## 📋 Требования
+
+- Python 3.10+
+- PostgreSQL 14+
+- Docker & Docker Compose (опционально)
+
+## 🛠️ Стек технологий
+
+- **Backend:** FastAPI, Uvicorn
+- **Database:** PostgreSQL, SQLAlchemy 2.0 (async)
+- **Authentication:** JWT (python-jose), bcrypt
+- **Validation:** Pydantic v2
+- **Testing:** pytest, pytest-asyncio, httpx
+- **Containerization:** Docker, Docker Compose
+
+## 📁 Структура проекта
+
+botoferma/
+├── app/ # Исходный код приложения
+│ ├── main.py # Точка входа FastAPI
+│ ├── config.py # Конфигурация и настройки
+│ ├── database.py # Подключение к БД
+│ ├── auth.py # JWT токены и аутентификация
+│ └── users/ # Модуль пользователей
+│ ├── models.py # SQLAlchemy модели
+│ ├── schemas.py # Pydantic схемы
+│ ├── crud.py # CRUD операции
+│ ├── utils.py # Утилиты (хеширование)
+│ └── router.py # API endpoints
+├── tests/ # Тесты
+│ ├── conftest.py # Фикстуры pytest
+│ └── test_users.py # E2E тесты API
+├── docker-compose.yml # Docker Compose конфигурация
+├── Dockerfile # Docker образ
+├── requirements.txt # Python зависимости
+├── pytest.ini # Конфигурация pytest
+├── .env # Переменные окружения
+└── README.md
+
+text
+
+## 🚀 Быстрый старт
+
+### Вариант 1: Docker (рекомендуется)
+
+Клонировать репозиторий
+
+git clone [<repository-url>](https://github.com/L0l1pop/Botoferma.git)
+cd botoferma
+Создать .env файл
+
+Запустить с Docker Compose
+
+docker-compose up --build
+
+
+text
+
+Приложение доступно на http://localhost:8000
+
+### Вариант 2: Локальная разработка
+
+Создать виртуальное окружение
+
+python -m venv venv
+source venv/bin/activate # Linux/Mac
+или
+
+venv\Scripts\activate # Windows
+Установить зависимости
+
+pip install -r requirements.txt
+Настроить .env файл
+
+Запустить PostgreSQL (через Docker или локально)
+
+docker run -d
+--name botoferma_postgres
+-e POSTGRES_USER=postgres
+-e POSTGRES_PASSWORD=postgres
+-e POSTGRES_DB=botoferma
+-p 5432:5432
+postgres:14-alpine
+Инициализировать БД
+
+python -m app.init_db
+Запустить приложение
+
+uvicorn app.main:app --reload
+
+text
+
+## 🔧 Конфигурация
+
+Создайте `.env` файл в корне проекта:
+
+Database
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=botoferma
+JWT
+
+SECRET_KEY=your-secret-key-min-32-characters-long
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+App
+
+DEBUG=True
+
+text
+
+Для генерации `SECRET_KEY`:
+
+openssl rand -hex 32
+
+text
+
+## 📚 API Документация
+
+После запуска приложения:
+
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+- **OpenAPI JSON:** http://localhost:8000/openapi.json
+
+### Основные endpoints:
+
+#### Аутентификация
+
+POST /api/register # Регистрация пользователя
+POST /api/login # Получение JWT токена
+GET /api/users/me # Информация о текущем пользователе
+
+text
+
+#### Управление пользователями
+
+GET /api/users # Список всех пользователей
+POST /api/users/acquire # Заблокировать пользователя для теста
+POST /api/users/release # Разблокировать пользователя
+
+text
+
+## 🧪 Тестирование
+
+Запустить все тесты
+
+pytest
+С подробным выводом
+
+pytest -v
+С покрытием кода
+
+pytest --cov=app --cov-report=html
+Конкретный тест
+
+pytest tests/test_users.py::test_register_user
+В Docker
+
+docker-compose exec app pytest -v
+
+text
+
+## 📝 Примеры использования
+
+### Регистрация пользователя
+
+curl -X POST "http://localhost:8000/api/register"
+-H "Content-Type: application/json"
+-d '{
+"login": "test@example.com",
+"password": "password123",
+"project_id": "550e8400-e29b-41d4-a716-446655440000",
+"env": "prod",
+"domain": "regular"
+}'
+
+text
+
+### Аутентификация
+
+curl -X POST "http://localhost:8000/api/login"
+-H "Content-Type: application/json"
+-d '{
+"login": "test@example.com",
+"password": "password123"
+}'
+
+text
+
+### Блокировка пользователя для теста
+
+TOKEN="your-jwt-token"
+USER_ID="550e8400-e29b-41d4-a716-446655440000"
+
+curl -X POST "http://localhost:8000/api/users/acquire"
+-H "Authorization: Bearer $TOKEN"
+-H "Content-Type: application/json"
+-d "{"user_id": "$USER_ID"}"
+
+text
+
+### Разблокировка пользователя
+
+curl -X POST "http://localhost:8000/api/users/release"
+-H "Authorization: Bearer $TOKEN"
+-H "Content-Type: application/json"
+-d "{"user_id": "$USER_ID"}"
+
+text
+
+## 🐳 Docker команды
+
+Собрать образы
+
+docker-compose build
+Запустить сервисы
+
+docker-compose up -d
+Остановить сервисы
+
+docker-compose down
+Удалить с volumes (БД)
+
+docker-compose down -v
+Логи приложения
+
+docker-compose logs -f app
+Логи PostgreSQL
+
+docker-compose logs -f postgres
+Войти в контейнер
+
+docker-compose exec app bash
+Перезапустить сервисы
+
+docker-compose restart
+
+text
+
+## 📊 Модель данных
+
+### User (Пользователь)
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `id` | UUID | Уникальный идентификатор |
+| `created_at` | DateTime | Дата создания |
+| `login` | String | Email пользователя (уникальный) |
+| `password` | String | Хешированный пароль |
+| `project_id` | UUID | ID проекта |
+| `env` | Enum | Окружение (prod, preprod, stage) |
+| `domain` | Enum | Тип домена (canary, regular) |
+| `locktime` | DateTime | Временная метка блокировки |
+
+## 🔒 Безопасность
+
+- Пароли хешируются с использованием bcrypt
+- JWT токены для аутентификации
+- CORS middleware настроен
+- Валидация данных через Pydantic
+- SQL injection защита через SQLAlchemy ORM
